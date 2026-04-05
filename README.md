@@ -1,7 +1,8 @@
-
 # Calc Interpreter
 
 A Java-based interpreter for **Calc**, a simple scripting language that supports arithmetic expressions, variables, and control flow. Write `.calc` programs and run them directly from the command line.
+
+🌐 **Live Demo:** [https://calc-interpreter.onrender.com](https://calc-interpreter.onrender.com)
 
 ---
 
@@ -9,7 +10,9 @@ A Java-based interpreter for **Calc**, a simple scripting language that supports
 
 - **Arithmetic Expressions** — Addition, subtraction, multiplication, division, and parenthesized expressions
 - **Variables** — Declare and assign variables; use them in expressions
-- **Control Flow** — `if`/`else` conditionals and loop constructs
+- **Control Flow** — `if` conditionals and loop constructs
+- **Web Interface** — Run Calc programs directly in the browser
+- **REPL Mode** — Interactive terminal for live expression evaluation
 
 ---
 
@@ -18,15 +21,26 @@ A Java-based interpreter for **Calc**, a simple scripting language that supports
 ```
 Calc-Interpreter/
 ├── src/
-│   ├── Main.java          # Entry point — reads and runs .calc files
-│   ├── Lexer.java         # Tokenizes source input
-│   ├── Parser.java        # Builds AST from tokens
-│   ├── Interpreter.java   # Walks AST and evaluates expressions
-│   └── ...
+│   └── main/
+│       ├── java/com/calc/
+│       │   ├── Main.java              # Entry point — web server + REPL + file mode
+│       │   ├── CalcController.java    # REST API for web interface
+│       │   ├── Interpreter.java       # Walks AST and evaluates expressions
+│       │   ├── Tokenizer.java         # Tokenizes source input
+│       │   ├── Parser.java            # Builds AST from tokens
+│       │   ├── Environment.java       # Variable storage
+│       │   ├── CalcException.java     # Error handling
+│       │   └── ...
+│       └── resources/static/
+│           └── index.html             # Web interface
 ├── samples/
 │   ├── program1.calc
 │   ├── program2.calc
-│   └── ...
+│   ├── program3.calc
+│   └── program4.calc
+├── Dockerfile
+├── pom.xml
+├── .gitignore
 └── README.md
 ```
 
@@ -36,136 +50,165 @@ Calc-Interpreter/
 
 ### Prerequisites
 
-- Java JDK 8 or later
+- Java JDK 17 or later
+- Maven 3.9+
 - A terminal (PowerShell, bash, etc.)
 
-### Compile
-
-From the project root:
+### Run Web Interface
 
 ```powershell
-javac src/*.java -d out
+mvn spring-boot:run
 ```
 
-This compiles all source files and places the `.class` files into the `out/` directory.
+Then open [http://localhost:8080](http://localhost:8080) in your browser.
 
-### Run
+### Run a `.calc` File
 
 ```powershell
 java -cp out Main samples/program1.calc
 ```
 
-> **Note:** Always run from the project root so that relative file paths resolve correctly.
+### Run REPL Mode
+
+```powershell
+java -cp out Main --repl
+```
 
 ---
 
 ## Language Syntax
+
+### Print
+
+Use `>>` to print a value or expression.
+
+```
+>> "Hello, World!"
+>> 42
+```
+
+### Variables
+
+Assign a value to a variable with `:=`.
+
+```
+x := 10
+y := x * 2 + 5
+>> y          # => 25
+```
 
 ### Arithmetic Expressions
 
 Standard math operators are supported with the usual precedence rules.
 
 ```
-2 + 3 * 4       # => 14
-(2 + 3) * 4     # => 20
-10 / 2 - 1      # => 4
+>> 2 + 3 * 4       # => 14
+>> (2 + 3) * 4     # => 20
+>> 10 / 2 - 1      # => 4
 ```
 
-### Variables
-
-Assign a value to a variable with `=`. Variables can be used in any expression after assignment.
+### If Condition
 
 ```
-x = 10
-y = x * 2 + 5
-print y          # => 25
-```
-
-### If / Else
-
-```
-x = 15
-
-if x > 10 {
-    print "x is greater than 10"
-} else {
-    print "x is 10 or less"
-}
+score := 85
+? score > 50 =>
+>> "Pass"
 ```
 
 ### Loops
 
+Use `@` followed by the number of iterations.
+
 ```
-i = 0
-while i < 5 {
-    print i
-    i = i + 1
-}
+i := 1
+@ 4 =>
+>> i
+i := i + 1
 ```
 
 ---
 
 ## Usage Examples
 
-### Example 1 — Basic Arithmetic (`samples/program1.calc`)
+### Example 1 — Arithmetic (`samples/program1.calc`)
 
 ```
-a = 6
-b = 7
-print a * b      # => 42
+x := 10
+y := 3
+result := x + y * 2
+>> result
 ```
 
-Run it:
+Output:
+```
+16
+```
+
+### Example 2 — Strings (`samples/program2.calc`)
+
+```
+name := "Sitare"
+>> name
+>> "Hello from CALC"
+```
+
+Output:
+```
+Sitare
+Hello from CALC
+```
+
+### Example 3 — If Condition (`samples/program3.calc`)
+
+```
+score := 85
+? score > 50 =>
+>> "Pass"
+```
+
+Output:
+```
+Pass
+```
+
+### Example 4 — Loop (`samples/program4.calc`)
+
+```
+i := 1
+@ 4 =>
+>> i
+i := i + 1
+```
+
+Output:
+```
+1
+2
+3
+4
+```
+
+---
+
+## REPL Mode
+
+Run without a file to enter interactive mode:
 
 ```powershell
-java -cp out Main samples/program1.calc
+java -cp out Main --repl
 ```
 
-Output:
 ```
-42
-```
-
-### Example 2 — Countdown Loop
-
-```
-n = 5
-while n > 0 {
-    print n
-    n = n - 1
-}
-print "Liftoff!"
-```
-
-Output:
-```
-5
-4
-3
-2
-1
-Liftoff!
-```
-
-### Example 3 — Conditional Logic
-
-```
-score = 72
-
-if score >= 90 {
-    print "A"
-} else if score >= 80 {
-    print "B"
-} else if score >= 70 {
-    print "C"
-} else {
-    print "F"
-}
-```
-
-Output:
-```
-C
+Calc Interpreter REPL
+Type 'exit' to quit, 'load <file>' to run a file
+─────────────────────────────────────────────
+>>> x := 10
+>>> >> x
+10
+>>> load samples/program1.calc
+16
+>>> exit
+Goodbye!
 ```
 
 ---
@@ -177,6 +220,7 @@ C
 | `ClassNotFoundException: Main` | Not compiled, or running from wrong directory | Compile with `javac src/*.java -d out` and run from project root |
 | `Could not read file` | File path is relative to wrong directory | Always run `java` from the project root |
 | `Unexpected token` | Syntax error in `.calc` file | Check your source file against the syntax guide above |
+| `mvn: command not found` | Maven not installed or not in PATH | Install Maven and add to PATH |
 
 ---
 
