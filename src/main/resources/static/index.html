@@ -36,9 +36,10 @@
     <h1>⚙ Calc Interpreter</h1>
     <select id="samples">
         <option value="">— Load Sample —</option>
-        <option value="x := 10\ny := x * 2\n>> y">Variables</option>
-        <option value="i := 0\ni < 5 => [\n  >> i\n  i := i + 1\n]">Loop</option>
-        <option value="x := 15\nx > 10 ? >> &quot;big&quot; : >> &quot;small&quot;">If/Else</option>
+        <option value="x := 10&#10;y := 3&#10;result := x + y * 2&#10;>> result">1. Arithmetic</option>
+        <option value="name := &quot;Sitare&quot;&#10;>> name&#10;>> &quot;Hello from CALC&quot;">2. Strings</option>
+        <option value="score := 85&#10;? score > 50 =>&#10;>> &quot;Pass&quot;">3. If Condition</option>
+        <option value="i := 1&#10;@ 4 =>&#10;>> i&#10;i := i + 1">4. Loop</option>
     </select>
 </header>
 
