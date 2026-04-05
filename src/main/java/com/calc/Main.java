@@ -1,20 +1,31 @@
+package com.calc;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+@SpringBootApplication
 public class Main {
 
     public static void main(String[] args) {
         if (args.length == 1) {
+            // File mode — original behavior
             runFile(args[0]);
-        } else {
+        } else if (args.length > 0 && args[0].equals("--repl")) {
+            // REPL mode — explicit flag
             runRepl();
+        } else {
+            // No args — start Spring Boot web server
+            SpringApplication.run(Main.class, args);
         }
     }
 
-    private static void runFile(String path) {
+    // ─── File Mode ───────────────────────────────────────────
+    public static void runFile(String path) {
         try {
             byte[] bytes = Files.readAllBytes(Paths.get(path));
             String sourceCode = new String(bytes, StandardCharsets.UTF_8);
@@ -31,9 +42,10 @@ public class Main {
         }
     }
 
-    private static void runRepl() {
+    // ─── REPL Mode ───────────────────────────────────────────
+    public static void runRepl() {
         Scanner scanner = new Scanner(System.in);
-        Interpreter interpreter = new Interpreter(); // shared state across lines
+        Interpreter interpreter = new Interpreter();
 
         System.out.println(Colors.CYAN + "Calc Interpreter REPL" + Colors.RESET);
         System.out.println(Colors.CYAN + "Type 'exit' to quit, 'load <file>' to run a file" + Colors.RESET);
@@ -44,10 +56,8 @@ public class Main {
             String line = scanner.nextLine().trim();
 
             if (line.equals("exit")) break;
-
             if (line.isEmpty()) continue;
 
-            // Load file command
             if (line.startsWith("load ")) {
                 String path = line.substring(5).trim();
                 try {
@@ -64,7 +74,6 @@ public class Main {
                 continue;
             }
 
-            // Run typed input
             try {
                 interpreter.run(line);
             } catch (CalcException e) {

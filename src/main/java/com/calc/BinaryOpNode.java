@@ -1,5 +1,6 @@
 // Internal node — applies an operator to two sub-expressions
 // Arithmetic (+ - * /) → Double,  Comparisons (> < ==) → Boolean
+package com.calc;
 final class BinaryOpNode implements Expression {
 
     private final Expression left;

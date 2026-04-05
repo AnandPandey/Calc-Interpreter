@@ -1,3 +1,4 @@
+package com.calc;
 // Leaf node — variable reference e.g. x, result
 final class VariableNode implements Expression {
 

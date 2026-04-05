@@ -1,3 +1,4 @@
+package com.calc;
 // Leaf node — numeric literal e.g. 10, 3.14
 final class NumberNode implements Expression {
 

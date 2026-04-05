@@ -1,3 +1,4 @@
+package com.calc;
 // Leaf node — string literal e.g. "hello"
 final class StringNode implements Expression {
 

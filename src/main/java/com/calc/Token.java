@@ -1,3 +1,4 @@
+package com.calc;
 import java.util.Objects;
 
 // Immutable value object representing one labelled piece of source code.

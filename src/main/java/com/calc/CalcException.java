@@ -1,5 +1,6 @@
 // Single exception type for all interpreter errors (tokenizer, parser, runtime)
 // Format: [TOKENIZER] line 3: Unexpected character '@'
+package com.calc;
 public class CalcException extends RuntimeException {
 
     public enum Phase { TOKENIZER, PARSER, RUNTIME }

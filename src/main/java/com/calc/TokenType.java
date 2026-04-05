@@ -1,3 +1,4 @@
+package com.calc;
 // Defines every token type in the CALC language vocabulary
 public enum TokenType {
 

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calc Interpreter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1e1e2e; color: #cdd6f4; font-family: monospace; height: 100vh; display: flex; flex-direction: column; }
+        header { padding: 16px 24px; background: #181825; border-bottom: 1px solid #313244; display: flex; align-items: center; gap: 12px; }
+        header h1 { font-size: 1.2rem; color: #cba6f7; }
+        select { background: #313244; color: #cdd6f4; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .main { display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden; }
+        .editor-pane, .output-pane { display: flex; flex-direction: column; }
+        .pane-header { padding: 8px 16px; background: #181825; font-size: 0.8rem; color: #6c7086; border-bottom: 1px solid #313244; display: flex; justify-content: space-between; align-items: center; }
+        .CodeMirror { flex: 1; height: 100%; font-size: 14px; }
+        .CodeMirror-scroll { height: calc(100vh - 120px); }
+        button#runBtn { background: #a6e3a1; color: #1e1e2e; border: none; padding: 6px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        button#runBtn:hover { background: #94d3a2; }
+        .output-pane { border-left: 1px solid #313244; }
+        #output { flex: 1; padding: 16px; overflow-y: auto; white-space: pre-wrap; font-size: 14px; line-height: 1.6; }
+        .error { color: #f38ba8; }
+        .success { color: #a6e3a1; }
+        .vars-panel { border-top: 1px solid #313244; padding: 12px 16px; max-height: 180px; overflow-y: auto; }
+        .vars-panel h3 { font-size: 0.75rem; color: #6c7086; margin-bottom: 8px; }
+        .var-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 3px 0; border-bottom: 1px solid #1e1e2e; }
+        .var-name { color: #89b4fa; }
+        .var-val { color: #fab387; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>⚙ Calc Interpreter</h1>
+    <select id="samples">
+        <option value="">— Load Sample —</option>
+        <option value="x := 10\ny := x * 2\nprint y">Variables</option>
+        <option value="i := 0\ni < 5 => [\n  print i\n  i := i + 1\n]">Loop</option>
+        <option value="x := 15\nx > 10 ? print &quot;big&quot; : print &quot;small&quot;">If/Else</option>
+    </select>
+</header>
+
+<div class="main">
+    <div class="editor-pane">
+        <div class="pane-header">
+            <span>Editor</span>
+            <button id="runBtn">▶ Run</button>
+        </div>
+        <textarea id="editor"></textarea>
+    </div>
+    <div class="output-pane">
+        <div class="pane-header"><span>Output</span></div>
+        <div id="output">// Output will appear here...</div>
+        <div class="vars-panel">
+            <h3>VARIABLES</h3>
+            <div id="vars">— none yet —</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      theme: "dracula",
+      lineNumbers: true,
+      mode: "text/plain",
+      tabSize: 2,
+      lineWrapping: true
+    });
+
+    document.getElementById("samples").addEventListener("change", function () {
+      if (this.value) editor.setValue(this.value.replace(/\\n/g, "\n"));
+    });
+
+    document.getElementById("runBtn").addEventListener("click", async () => {
+      const code = editor.getValue();
+      const outputEl = document.getElementById("output");
+      outputEl.textContent = "Running...";
+
+      try {
+        const res = await fetch("/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+          outputEl.innerHTML = `<span class="error">Error: ${data.error}</span>`;
+        } else {
+          outputEl.innerHTML = `<span class="success">${data.output || "(no output)"}</span>`;
+        }
+      } catch (e) {
+        outputEl.innerHTML = `<span class="error">Could not connect to server.</span>`;
+      }
+    });
+</script>
+</body>
+</html>

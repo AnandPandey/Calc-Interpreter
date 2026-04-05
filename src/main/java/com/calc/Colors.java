@@ -1,3 +1,4 @@
+package com.calc;
 public class Colors {
     public static final String RESET  = "\u001B[0m";
     public static final String GREEN  = "\u001B[32m";  // output values
